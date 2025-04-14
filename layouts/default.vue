@@ -9,7 +9,7 @@
           <h1 class="text-xl font-medium">HTML to Markdown 转换器</h1>
         </div>
         <a 
-          href="https://github.com/mixmark-io/turndown" 
+          href="https://github.com/wlor0623/html2md" 
           target="_blank" 
           class="text-white hover:text-gray-200 transition-colors flex items-center space-x-1"
         >
