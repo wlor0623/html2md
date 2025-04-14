@@ -21,7 +21,7 @@
       </div>
     </header>
     
-    <main class="py-6">
+    <main >
       <slot />
     </main>
     

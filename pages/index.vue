@@ -6,7 +6,7 @@ import { marked } from 'marked'
 const htmlInput = ref('')
 const markdown = ref('')
 const isProcessing = ref(false)
-const activeTab = ref('preview') // Default to preview tab
+const activeTab = ref('preview') // Not needed anymore as we'll show both at once
 const debounceTimeout = ref(null)
 
 // Configure TurndownService with options
@@ -108,112 +108,75 @@ const renderedMarkdown = computed(() => {
 </script>
 
 <template>
-  <div class="container mx-auto px-4 py-8 max-w-4xl">
-    <div class="mb-8 text-center">
-      <h1 class="text-3xl font-bold mb-2">HTML to Markdown</h1>
-      <p class="text-gray-600">将HTML内容转换为Markdown格式</p>
+  <div class="h-screen flex flex-col">
+    <div class="p-2 bg-[#171717] text-white text-center">
+      <h1 class="text-xl font-bold">HTML to Markdown 转换器</h1>
     </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- HTML Input Panel -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-[#fafafa] px-4 py-3 border-b border-[#f0f0f0] flex justify-between items-center">
+    
+    <div class="flex flex-1 overflow-hidden">
+      <!-- HTML Input Panel - 1/3 width -->
+      <div class="w-1/3 flex flex-col border-r border-[#e5e5e5]">
+        <div class="bg-[#fafafa] px-4 py-2 border-b border-[#f0f0f0] flex justify-between items-center">
           <h2 class="text-lg font-medium text-[#171717]">HTML 输入</h2>
           <div class="flex gap-2">
             <button 
               @click="insertSampleHtml" 
-              class="bg-[#171717] hover:bg-black text-white px-3 py-1 rounded-lg text-sm transition-colors"
+              class="bg-[#171717] hover:bg-black text-white px-2 py-1 rounded-lg text-xs transition-colors"
             >
               插入示例
             </button>
             <button 
               @click="clearAll" 
-              class="bg-[#8c8c8c] hover:bg-[#6c6c6c] text-white px-3 py-1 rounded-lg text-sm transition-colors"
+              class="bg-[#8c8c8c] hover:bg-[#6c6c6c] text-white px-2 py-1 rounded-lg text-xs transition-colors"
             >
               清空
             </button>
           </div>
         </div>
-        <div class="p-4">
-          <textarea
-            v-model="htmlInput"
-            class="w-full h-[calc(100vh-380px)] border border-[#e5e5e5] rounded-lg p-3 font-mono text-sm focus:ring-2 focus:ring-[#171717] focus:border-[#171717] outline-none transition"
-            placeholder="在此粘贴 HTML 代码..."
-          ></textarea>
-        </div>
+        <textarea
+          v-model="htmlInput"
+          class="flex-1 p-3 font-mono text-sm focus:outline-none resize-none"
+          placeholder="在此粘贴 HTML 代码..."
+        ></textarea>
       </div>
       
-      <!-- Markdown Output Panel -->
-      <div class="bg-white rounded-xl shadow-md overflow-hidden">
-        <div class="bg-[#fafafa] px-4 py-3 border-b border-[#f0f0f0]">
-          <div class="flex justify-between items-center">
-            <h2 class="text-lg font-medium text-[#171717]">Markdown 输出</h2>
-            <div>
-              <button 
-                @click="downloadMarkdown" 
-                class="bg-[#171717] hover:bg-black text-white px-3 py-1 rounded-lg text-sm transition-colors"
-                :disabled="!markdown"
-              >
-                下载
-              </button>
-            </div>
-          </div>
-          
-          <!-- Tabs -->
-          <div class="flex mt-2 space-x-2">
-            <button 
-              @click="activeTab = 'raw'" 
-              :class="[
-                'py-1 px-3 text-sm font-medium rounded-lg transition-colors', 
-                activeTab === 'raw' 
-                  ? 'bg-[#171717] text-white' 
-                  : 'text-[#171717] hover:bg-[#f0f0f0]'
-              ]"
-            >
-              源代码
-            </button>
-            <button 
-              @click="activeTab = 'preview'" 
-              :class="[
-                'py-1 px-3 text-sm font-medium rounded-lg transition-colors',
-                activeTab === 'preview' 
-                  ? 'bg-[#171717] text-white' 
-                  : 'text-[#171717] hover:bg-[#f0f0f0]'
-              ]"
-              :disabled="!markdown"
-            >
-              预览
-            </button>
-          </div>
-        </div>
-        
-        <div class="p-4">
-          <!-- Raw Markdown -->
-          <textarea
-            v-if="activeTab === 'raw'"
-            v-model="markdown"
-            readonly
-            class="w-full h-[calc(100vh-380px)] border border-[#e5e5e5] rounded-lg p-3 font-mono text-sm bg-[#fafafa] outline-none"
-            placeholder="Markdown 将显示在这里..."
-          ></textarea>
-          
-          <!-- Markdown Preview -->
-          <div
-            v-else
-            class="border border-[#e5e5e5] rounded-lg p-4 h-[calc(100vh-380px)] overflow-auto bg-white"
+      <!-- Markdown Code Panel - 1/3 width -->
+      <div class="w-1/3 flex flex-col border-r border-[#e5e5e5]">
+        <div class="bg-[#fafafa] px-4 py-2 border-b border-[#f0f0f0] flex justify-between items-center">
+          <h2 class="text-lg font-medium text-[#171717]">Markdown 代码</h2>
+          <button 
+            @click="downloadMarkdown" 
+            class="bg-[#171717] hover:bg-black text-white px-2 py-1 rounded-lg text-xs transition-colors"
+            :disabled="!markdown"
           >
-            <div v-if="!markdown" class="text-[#8c8c8c] text-center py-8">
-              <svg class="mx-auto h-12 w-12 text-[#e0e0e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
-              </svg>
-              <p class="mt-2">输入 HTML 后会自动在这里预览转换后的 Markdown</p>
-            </div>
-            <div v-else-if="isProcessing" class="text-[#8c8c8c] text-center py-8">
-              <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#171717] mx-auto"></div>
-              <p class="mt-2">正在转换...</p>
-            </div>
-            <div v-else class="prose prose-neutral max-w-none" v-html="renderedMarkdown"></div>
+            下载
+          </button>
+        </div>
+        <textarea
+          v-model="markdown"
+          readonly
+          class="flex-1 p-3 font-mono text-sm bg-[#fafafa] focus:outline-none resize-none"
+          placeholder="Markdown 将显示在这里..."
+        ></textarea>
+      </div>
+      
+      <!-- Markdown Preview Panel - 1/3 width -->
+      <div class="w-1/3 flex flex-col">
+        <div class="bg-[#fafafa] px-4 py-2 border-b border-[#f0f0f0]">
+          <h2 class="text-lg font-medium text-[#171717]">Markdown 预览</h2>
+        </div>
+        <div class="flex-1 overflow-auto p-4">
+          <div v-if="!markdown" class="text-[#8c8c8c] text-center py-8">
+            <svg class="mx-auto h-12 w-12 text-[#e0e0e0]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+            </svg>
+            <p class="mt-2">输入 HTML 后会自动在这里预览转换后的 Markdown</p>
           </div>
+          <div v-else-if="isProcessing" class="text-[#8c8c8c] text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#171717] mx-auto"></div>
+            <p class="mt-2">正在转换...</p>
+          </div>
+          <div v-else class="prose prose-neutral max-w-none" v-html="renderedMarkdown"></div>
         </div>
       </div>
     </div>
@@ -248,48 +211,5 @@ const renderedMarkdown = computed(() => {
 }
 .prose ul, .prose ol {
   margin-left: 1.5em;
-  color: #171717;
-}
-.prose pre {
-  background-color: #f5f5f5;
-  padding: 1em;
-  border-radius: 0.375em;
-  overflow-x: auto;
-}
-.prose code {
-  background-color: #f5f5f5;
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
-  color: #171717;
-}
-.prose blockquote {
-  border-left: 4px solid #e5e5e5;
-  padding-left: 1em;
-  color: #8c8c8c;
-  font-style: italic;
-}
-.prose a {
-  color: #171717;
-  font-weight: 500;
-  text-decoration: underline;
-}
-.prose img {
-  border-radius: 0.375em;
-  max-width: 100%;
-}
-
-/* Loading animation */
-.loading-spinner {
-  display: inline-block;
-  width: 1rem;
-  height: 1rem;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 </style> 
